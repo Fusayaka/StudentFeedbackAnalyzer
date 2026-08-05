@@ -4,7 +4,7 @@ import os
 from models.tokenizer import Tokenizer
 
 class TextPreprocessor:
-    def __init__(self, dict_path: str = "teencode.json", tokenizer = None):
+    def __init__(self, dict_path: str = "teencode.json", tokenizer: Tokenizer = None):
         self.tokenizer = tokenizer
         
         current_dir = os.path.dirname(os.path.abspath(__file__))
