@@ -9,7 +9,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import Config
 from models.tokenizer import VnCoreNLPTokenizer, UndertheseaTokenizer
 from models.preprocessor import TextPreprocessor
-from models.architecture import MultiTaskPhoBERT
+from models.utils import build_model
 
 class FeedbackPipeline:
     def __init__(self, model_path: str, tokenizer_type: str = "vncore"):
@@ -39,14 +39,7 @@ class FeedbackPipeline:
         # 3. NẠP TRỌNG SỐ MÔ HÌNH
         # ==========================================
         print(f"Loading model weights from: {model_path}...")
-        self.model = MultiTaskPhoBERT(Config.MODEL_NAME, Config.DROPOUT)
-        
-        if not os.path.exists(model_path):
-            raise FileNotFoundError(f"[LỖI] Không tìm thấy trọng số tại {model_path}.")
-            
-        self.model.load_state_dict(torch.load(model_path, map_location=self.device))
-        self.model.to(self.device)
-        
+        self.model = build_model(model_path)
         self.model.eval()
         print("Model is ready for inference!")
 
