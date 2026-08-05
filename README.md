@@ -10,14 +10,26 @@ Built on a fine-tuned [PhoBERT](https://huggingface.co/vinai/phobert-base) with 
 ## Project Structure
 
 ```
-api/            FastAPI backend (serves /predict, /health)
-ui/             Streamlit frontend
-models/         Model architecture, dataset, tokenizer, preprocessing, train/eval logic
-data/           Teencode normalization dictionary
-weights/        Trained model checkpoint (best.pt) — not tracked in git
-VnCoreNLP/      Word segmenter, auto-downloaded on first run — not tracked in git
-config.py       Central configuration (paths, hyperparameters, label mappings)
-main.py         CLI entry point (train / eval / predict / start)
+api/
+  main.py             FastAPI backend (serves /predict, /health)
+ui/
+  app.py              Streamlit frontend
+models/
+  architecture.py     MultiTaskPhoBERT model definition
+  dataset.py          PyTorch Dataset wrapping tokenized feedback
+  tokenizer.py        VnCoreNLP / Underthesea word segmenters
+  preprocessor.py     Text cleaning (noise removal, teencode, word segmentation)
+  data.py             Shared UIT-VSFC loading, preprocessing, DataLoader construction
+  utils.py            Shared model construction, checkpoint loading, inference loop
+  train.py            Training loop
+  evaluate.py         Test-set evaluation / classification report
+  inference.py        FeedbackPipeline used by the API for single-sentence prediction
+data/
+  teencode.json       Teencode normalization dictionary
+weights/              Trained model checkpoint (best.pt) — not tracked in git
+VnCoreNLP/            Word segmenter, auto-downloaded on first run — not tracked in git
+config.py             Central configuration (paths, hyperparameters, label mappings)
+main.py               CLI entry point (train / eval / predict / start)
 ```
 
 ## Setup
