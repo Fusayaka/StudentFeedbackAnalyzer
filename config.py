@@ -25,7 +25,11 @@ class Config:
     EPOCHS = 5
     LEARNING_RATE = 2e-5
     DROPOUT = 0.3
-    
+
+    # Dataset
+    UIT_VSFC_REPO = "uitnlp/vietnamese_students_feedback"
+    UIT_VSFC_REVISION = "refs/convert/parquet"
+
     # Label Mappings
     TOPIC_MAPPING = {
         0: "Giảng viên", 
