@@ -26,3 +26,6 @@ VnCoreNLP/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Local scratch/test files
+test/
