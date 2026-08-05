@@ -1,0 +1,28 @@
+# Environment
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.eggs/
+build/
+dist/
+venv/
+.venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Model artifacts / large downloads
+weights/*.pt
+weights/*.bin
+VnCoreNLP/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
