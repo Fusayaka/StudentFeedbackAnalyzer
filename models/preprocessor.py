@@ -15,7 +15,7 @@ class TextPreprocessor:
 
     def _load_dictionary(self) -> dict:
         if not os.path.exists(self.dict_path):
-            print(f"[Lưu ý] Không tìm thấy file {os.basename(self.dict_path)}. Hệ thống sẽ bỏ qua bước chuẩn hóa teencode.")
+            print(f"[Lưu ý] Không tìm thấy file {os.path.basename(self.dict_path)}. Hệ thống sẽ bỏ qua bước chuẩn hóa teencode.")
             return {}
             
         try:
