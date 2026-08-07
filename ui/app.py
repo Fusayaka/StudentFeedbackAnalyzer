@@ -1,57 +1,65 @@
 import streamlit as st
 import requests
-import time
 
 st.set_page_config(
     page_title="AI Feedback Analysis",
     layout="centered"
 )
 
+API_HEALTH_URL = "http://localhost:8000/health"
+API_PREDICT_URL = "http://localhost:8000/predict"
+MAX_HEALTH_CHECK_SECONDS = 10
+
+
+@st.cache_resource
+def get_http_session() -> requests.Session:
+    return requests.Session()
+
+
+def is_api_healthy() -> bool:
+    try:
+        return get_http_session().get(API_HEALTH_URL, timeout=1).status_code == 200
+    except requests.exceptions.RequestException:
+        return False
+
+
 if "ai_ready" not in st.session_state:
-    st.session_state.ai_ready = False
+    st.session_state.ai_ready = is_api_healthy()
+if "health_checks" not in st.session_state:
+    st.session_state.health_checks = 0
 
 st.title("Hệ thống Phân tích Phản hồi Sinh viên", width="content", text_alignment="center")
 st.markdown("Nhập đánh giá của bạn về môn học, giảng viên hoặc cơ sở vật chất. AI sẽ phân tích nó ngay lập tức!")
 
 user_input = st.text_area(
-    "Nội dung phản hồi:", 
+    "Nội dung phản hồi:",
     placeholder="Ví dụ: Thầy giảng bài rất hay, nhưng phòng máy lạnh bị hỏng nóng quá...",
     height=150
 )
 
-API_HEALTH_URL = "http://localhost:8000/health"
-API_PREDICT_URL = "http://localhost:8000/predict"
-
 button_placeholder = st.empty()
 result_container = st.container()
-
-if not st.session_state.ai_ready:
-    try:
-        res = requests.get(API_HEALTH_URL, timeout=1)
-        if res.status_code == 200:
-            st.session_state.ai_ready = True
-    except requests.exceptions.ConnectionError:
-        pass
 
 # ==========================================
 # GIAO DIỆN KHI AI CHƯA SẴN SÀNG
 # ==========================================
 if not st.session_state.ai_ready:
     button_placeholder.button("Đang nạp model AI", disabled=True, use_container_width=True)
-    
-    for _ in range(10):
-        time.sleep(1)
-        try:
-            res = requests.get(API_HEALTH_URL, timeout=1)
-            if res.status_code == 200:
-                st.session_state.ai_ready = True
-                st.rerun()
-        except requests.exceptions.ConnectionError:
-            pass
 
-    if not st.session_state.ai_ready:
-        st.error("🚨 Không thể kết nối đến AI Server. Vui lòng kiểm tra lại!")
-        st.stop()
+    @st.fragment(run_every=1)
+    def poll_health():
+        if st.session_state.ai_ready:
+            return
+        st.session_state.health_checks += 1
+        if is_api_healthy():
+            st.session_state.ai_ready = True
+            st.rerun()
+        elif st.session_state.health_checks >= MAX_HEALTH_CHECK_SECONDS:
+            st.error("🚨 Không thể kết nối đến AI Server. Vui lòng kiểm tra lại!")
+            st.stop()
+
+    poll_health()
+    st.stop()
 
 # ==========================================
 # GIAO DIỆN KHI AI ĐÃ SẴN SÀNG
@@ -62,8 +70,10 @@ if st.session_state.ai_ready:
             with result_container:
                 with st.spinner("AI đang xử lý ngôn ngữ..."):
                     try:
-                        response = requests.post(API_PREDICT_URL, json={"text": user_input})
-                        
+                        response = get_http_session().post(
+                            API_PREDICT_URL, json={"text": user_input}, timeout=30
+                        )
+
                         if response.status_code == 200:
                             result = response.json()
                             
